@@ -1,0 +1,12 @@
+periodo:
+    inicio: 1991-10-01
+    final: 2020-09-30
+area:
+    min: 100
+    max:
+seleccion:
+    disponibilidad: 0.9
+rutas:
+    anuario_aforos: C:/Users/jcr693/Documents/anuario_aforos/
+    EFAS: C:/Users/jcr693/Documents/EFASv5/
+
