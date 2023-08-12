@@ -103,7 +103,42 @@ def KGE(observado, simulado, sa=1, sb=1, sr=1):
     ED = np.sqrt((sr * (r - 1))**2 + (sa * (alpha - 1))**2 + (sb * (beta - 1))**2)
     KGE = 1 - ED
     
-    return KGE
+    return KGE, alpha, beta, r
+
+
+
+def KGEmod(observado, simulado, sa=1, sb=1, sr=1):
+    """Calcula el coeficiente de eficiencia de Kling-Gupta.
+    
+    Parámetros:
+    -----------
+    observado:   series. Serie observada
+    simulado:    series. Serie simulada
+    sa, sb, sr: integer. Factores de escala de los tres términos del KGE: alpha, beta y coeficiente de correlación, respectivamente
+    
+    Salida:
+    -------
+    KGE:        float. Eficienica de Kling-Gupta"""
+    
+    # Eliminar pasos sin dato
+    data = pd.concat((observado, simulado), axis=1)
+    data.columns = ['obs', 'sim']
+    data.dropna(axis=0, how='any', inplace=True)
+    # Para la función si no hay datos
+    if data.shape[0] == 0:
+        return
+
+    # calcular cada uno de los términos del KGE
+    alpha = (data.sim.std() / data.sim.mean()) / (data.obs.std() / data.obs.mean())
+    beta = data.sim.mean() / data.obs.mean()
+    r = np.corrcoef(data.obs, data.sim)[0, 1]
+    
+    # Cacular KGE
+    ED = np.sqrt((sr * (r - 1))**2 + (sa * (alpha - 1))**2 + (sb * (beta - 1))**2)
+    KGE = 1 - ED
+    
+    return KGE, alpha, beta, r
+    
 
 
 def matriz_confusion(obs, sim):

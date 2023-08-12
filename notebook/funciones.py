@@ -168,3 +168,6 @@ def point_polygon_statisctics(puntos, poligonos, func='mean'):
     # df.replace(np.nan, 0, inplace=True)
 
     return df
+
+
+

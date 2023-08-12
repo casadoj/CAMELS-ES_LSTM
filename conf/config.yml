@@ -6,6 +6,7 @@ area:
     max:
 seleccion:
     disponibilidad: 0.9
+    n_años: 8
 rutas:
     anuario_aforos: C:/Users/jcr693/Documents/anuario_aforos/
     EFAS: C:/Users/jcr693/Documents/EFASv5/
