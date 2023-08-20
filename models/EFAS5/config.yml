@@ -1,0 +1,192 @@
+# --- Experiment configurations --------------------------------------------------------------------
+
+# experiment name, used as folder name
+experiment_name: EFAS
+
+# place to store run directory (if empty runs are stored in $cwd$/runs/)
+run_dir:
+
+# files to specify training, validation and test basins (relative to code root or absolute path)
+train_basin_file: train_basins.txt
+validation_basin_file: validation_basins.txt
+test_basin_file: test_basins.txt
+
+# training, validation and test time periods (format = 'dd/mm/yyyy')
+train_start_date: "01/10/20152"
+train_end_date: "30/09/2020"
+validation_start_date: "01/10/2012"
+validation_end_date: "30/09/2015"
+test_start_date: "01/10/2009"
+test_end_date: "30/09/2012"
+
+# fixed seed, leave empty to use a random seed
+seed: 123
+
+# which GPU (id) to use [in format of cuda:0, cuda:1 etc, or cpu or None]
+device: cuda:0
+
+# --- Validation configuration ---------------------------------------------------------------------
+
+# specify after how many epochs to perform validation
+validate_every: 1
+
+# specify how many random basins to use for validation
+validate_n_random_basins: 57
+
+# specify which metrics to calculate during validation (see neuralhydrology.evaluation.metrics)
+# this can either be a list or a dictionary. If a dictionary is used, the inner keys must match the name of the
+# target_variable specified below. Using dicts allows for different metrics per target variable.
+metrics:
+  - KGE
+
+# --- Model configuration --------------------------------------------------------------------------
+
+# base model type [lstm, ealstm, cudalstm, embcudalstm, mtslstm]
+# (has to match the if statement in modelzoo/__init__.py)
+model: cudalstm
+
+# prediction head [regression]. Define the head specific parameters below
+head: regression
+
+# ----> Regression settings <----
+output_activation: linear
+
+# ----> General settings <----
+
+# Number of cell states of the LSTM
+hidden_size: 128
+
+# Initial bias value of the forget gate
+initial_forget_bias: 3
+
+# Dropout applied to the output of the LSTM
+output_dropout: 0.4
+
+# --- Training configuration -----------------------------------------------------------------------
+
+# specify optimizer [Adam]
+optimizer: Adam
+
+# specify loss [MSE, NSE, RMSE]
+loss: NSE
+
+# specify learning rates to use starting at specific epochs (0 is the initial learning rate)
+learning_rate:
+    0: 1e-2
+    30: 5e-3
+    40: 1e-3
+
+# Mini-batch size
+batch_size: 256
+
+# Number of training epochs
+epochs: 30
+
+# If a value, clips the gradients during training to that norm.
+clip_gradient_norm: 1
+
+# Defines which time steps are used to calculate the loss. Can't be larger than seq_length.
+# If use_frequencies is used, this needs to be a dict mapping each frequency to a predict_last_n-value, else an int.
+predict_last_n: 1
+
+# Length of the input sequence
+# If use_frequencies is used, this needs to be a dict mapping each frequency to a seq_length, else an int.
+seq_length: 365
+
+# Number of parallel workers used in the data pipeline
+num_workers: 2
+
+# Log the training loss every n steps
+log_interval: 5
+
+# If true, writes logging results into tensorboard file
+log_tensorboard: True
+
+# If a value and greater than 0, logs n random basins as figures during validation
+log_n_figures: 1
+
+# Save model weights every n epochs
+save_weights_every: 1
+
+# Store the results of the validation to disk
+save_validation_results: True
+
+# --- Data configurations --------------------------------------------------------------------------
+
+# which data set to use [camels_us, camels_gb, global, hourly_camels_us]
+dataset: generic
+
+# Path to data set root
+data_dir: ../../data/CAMELS_ESP
+
+dynamic_inputs:
+    - pr_emo1
+    - ta_emo1
+    - e0_emo1
+  
+static_attributes:
+    # topography
+    - elv_meam
+    - elv_min
+    - elv_max
+    - gradient_mean
+    - upArea_max
+    # land cover
+    - fracforest
+    - fracirrigated
+    - fracother
+    - fracsealed
+    - fracwater
+    - fracrice
+    # vegetation/crops
+    # - lai_yrmax
+    # - lai_yrmean
+    # - lai_yrmin
+    - cropcoef_mean
+    # soil type
+    - ksat1
+    - lambda1
+    - genua1
+    - soildepth1
+    - thetas1
+    - thetar1
+    # regulation
+    - tstor_sum
+    - tstor_count
+    - area_sum
+    - area_count
+    # demand
+    - dom_yr
+    - ene_yr
+    - ind_yr
+    - liv_yr
+    # model parameters
+    - adjust_Normal_Flood
+    - b_Xinanjiang
+    - CalChanMan1
+    - CalChanMan2
+    - GwLoss
+    - GwPercValue
+    - LakeMultiplier
+    - LowerZoneTimeConstant
+    - LZThreshold
+    - PowerPrefFlow
+    - QSplitMult
+    - ReservoirRnormqMult
+    - SnowMeltCoef
+    - UpperZoneTimeConstant
+    # hydrology
+    - pr_emo1_year
+    - ta_emo1_year
+    - e0_emo1_year
+    - dis_efas5_yrmean
+    - dis_efas5_yrmax
+    - dis_efas5_yrmin
+
+# which columns to use as target
+target_variables:
+  - dis_efas5
+
+# clip negative predictions to zero for all variables listed below. Should be a list, even for single variables.
+clip_targets_to_zero:
+  - dis_efas5
