@@ -9,5 +9,11 @@ seleccion:
     n_años: 8
 rutas:
     anuario_aforos: C:/Users/jcr693/Documents/anuario_aforos/
-    EFAS: C:/Users/jcr693/Documents/EFASv5/
+    EFAS: C:/Datasets/EFASv5/
+    caravan: C:/Datasets/CAMELS-ESP/
+
+train_size: .6
+val_size: .2
+seed: 123
+
 
