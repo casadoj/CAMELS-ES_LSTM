@@ -224,13 +224,14 @@ def periodo_estudio(series: pd.DataFrame, disponibilidad: float = .9, min_años:
     for stn in disp_diff.columns:
     
         # inicios y finales de cada una de las series de años que cumplen la disponibilidad
-        inicios = disp_diff[disp_diff[stn] == 1].index.to_list()
-        finales = disp_diff[disp_diff[stn] == -1].index.to_list()
+        inicios = disp_diff[disp_diff[stn] == 1].index.values
+        finales = disp_diff[disp_diff[stn] == -1].index.values - 1
         if len(inicios) == len(finales) + 1:
-            finales.append(disp_diff.index[-1])
+            # finales.append(disp_diff.index[-1])
+            finales = np.hstack((finales, disp_diff.index[-1]))
     
         # quedarse con el último periodo de datos completos
-        duraciones = np.array(finales) - np.array(inicios)
+        duraciones = finales - inicios + 1
         i = np.where(duraciones >= min_años)[0]
         if len(i) > 0:
             periodos['fin'][stn] = finales[i[-1]]
