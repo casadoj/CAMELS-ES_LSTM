@@ -11,12 +11,10 @@ El trabajo tiene 3 objetivos:
 
 ## Organización
 
-Actualmente el repositorio cuenta con siete directorios:
+Actualmente el repositorio cuenta con cinco directorios:
 
 1. `bib` contiene algunas referencias bibliográficas.
-2. `conf` contiene el archivo de configuración utilizado en la generación del conjunto de datos CAMELS-ESP.
-3. `data` contiene los datos de partida utilizados para generar el conjunto de datos CAMELS-ESP, así como el resultado final.
-4. `docs` contiene documentos como la propuesta de trabajo y el informe final.
-5. `environment` contiene los entornos Conda necesarios para replicar los códigos utilizado.
-6. `models` incluye los diversos modelos LSTM.
-7. `notebook` contiene los cuadernos de Jupyter utilizados para el tratamiento de datos.
+2. `data` contiene los datos de partida utilizados para generar el conjunto de datos CAMELS-ESP, así como el resultado final.
+3. `docs` contiene documentos como la propuesta de trabajo y el informe final.
+4. `environment` contiene los entornos Conda necesarios para replicar los códigos utilizado.
+5. `notebooks` contiene los cuadernos de Jupyter utilizados en las diversas fases del estudio.
