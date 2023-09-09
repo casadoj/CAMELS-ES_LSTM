@@ -8,7 +8,7 @@ seleccion:
     disponibilidad: 0.9
     n_años: 8
 rutas:
-    anuario_aforos: C:/Users/jcr693/Documents/anuario_aforos/
+    anuario_aforos: C:/Datasets/anuario_aforos/
     EFAS: C:/Datasets/EFASv5/iberia/
     caravan: C:/Datasets/CAMELS-ESP/CAMELS-ESP3/
 

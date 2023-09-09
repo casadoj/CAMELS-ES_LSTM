@@ -1,0 +1,56 @@
+attribute_means:
+  dis_efas5_yrmax: 9.580698102339863
+  dis_efas5_yrmean: 0.8854145384625554
+  dis_efas5_yrmin: 0.08773846262032217
+  e0_emo1_year: 2.42390293124608
+  pr_emo1_year: 2.0347612675609694
+  ta_emo1_year: 11.319368298094888
+attribute_stds:
+  dis_efas5_yrmax: 8.485858857942215
+  dis_efas5_yrmean: 0.7537556887418855
+  dis_efas5_yrmin: 0.13464851349347154
+  e0_emo1_year: 0.43900238849699297
+  pr_emo1_year: 0.8651741423069014
+  ta_emo1_year: 2.114468270788559
+xarray_feature_scale:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    dis_efas5:
+      dims: []
+      attrs: {}
+      data: 2.151479721069336
+    e0_emo1:
+      dims: []
+      attrs: {}
+      data: 2.0790247917175293
+    pr_emo1:
+      dims: []
+      attrs: {}
+      data: 5.519253730773926
+    ta_emo1:
+      dims: []
+      attrs: {}
+      data: 6.800662517547607
+xarray_feature_center:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    dis_efas5:
+      dims: []
+      attrs: {}
+      data: 0.9581207036972046
+    e0_emo1:
+      dims: []
+      attrs: {}
+      data: 2.459566354751587
+    pr_emo1:
+      dims: []
+      attrs: {}
+      data: 2.161984920501709
+    ta_emo1:
+      dims: []
+      attrs: {}
+      data: 12.017400741577148

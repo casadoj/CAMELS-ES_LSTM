@@ -117,7 +117,7 @@ save_validation_results: True
 dataset: generic
 
 # Path to data set root
-data_dir: ../../data/CAMELS_ESP
+data_dir: ../../../data/CAMELS-ESP
 
 dynamic_inputs:
   - total_precipitation_sum

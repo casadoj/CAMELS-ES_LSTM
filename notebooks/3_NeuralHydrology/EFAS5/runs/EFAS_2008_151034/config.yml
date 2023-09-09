@@ -1,0 +1,62 @@
+batch_size: 256
+clip_gradient_norm: 1
+clip_targets_to_zero:
+- dis_efas5
+commit_hash:
+data_dir: ../../data/CAMELS_ESP
+dataset: generic
+device: cuda:0
+dynamic_inputs:
+- pr_emo1
+- ta_emo1
+- e0_emo1
+epochs: 30
+experiment_name: EFAS
+head: regression
+hidden_size: 128
+img_log_dir: /content/drive/MyDrive/TFM/models/EFAS5/runs/EFAS_2008_151034/img_log
+initial_forget_bias: 3
+learning_rate:
+  0: 0.01
+  30: 0.005
+  40: 0.001
+log_interval: 5
+log_n_figures: 1
+log_tensorboard: true
+loss: NSE
+metrics:
+- KGE
+model: cudalstm
+num_workers: 2
+number_of_basins: 151
+optimizer: Adam
+output_activation: linear
+output_dropout: 0.4
+package_version: 1.9.0
+predict_last_n: 1
+run_dir: /content/drive/MyDrive/TFM/models/EFAS5/runs/EFAS_2008_151034
+save_validation_results: true
+save_weights_every: 1
+seed: 123
+seq_length: 365
+static_attributes:
+- pr_emo1_year
+- ta_emo1_year
+- e0_emo1_year
+- dis_efas5_yrmean
+- dis_efas5_yrmax
+- dis_efas5_yrmin
+target_variables:
+- dis_efas5
+test_basin_file: test_basins.txt
+test_end_date: 30/09/2012
+test_start_date: 01/10/2009
+train_basin_file: train_basins.txt
+train_dir: /content/drive/MyDrive/TFM/models/EFAS5/runs/EFAS_2008_151034/train_data
+train_end_date: 29/09/2020
+train_start_date: 01/10/2015
+validate_every: 1
+validate_n_random_basins: 57
+validation_basin_file: validation_basins.txt
+validation_end_date: 30/09/2015
+validation_start_date: 01/10/2012

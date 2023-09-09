@@ -6,10 +6,11 @@ from shapely.geometry import Point
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Dict, List, Union
+from tqdm.notebook import tqdm
 
 
 
-def extraer_caudal(file: Path, indroea: Union[str, List[str]] = None, start: Union[str, pd.Timestamp] = None, end: Union[str, pd.Timestamp] = None) -> pd.DataFrame:
+def extraer_caudal_estaciones(file: Path, indroea: Union[str, List[str]] = None, start: Union[str, pd.Timestamp] = None, end: Union[str, pd.Timestamp] = None) -> pd.DataFrame:
     """Extrae las series diarias de caudal del archivo 'afliq.csv' del Anuario de Aforos. La serie se puede recortar al periodo y estaciones de interés
     
     Parámetros:
@@ -43,7 +44,7 @@ def extraer_caudal(file: Path, indroea: Union[str, List[str]] = None, start: Uni
     if end is not None:
         data = data.loc[data.fecha <= end, :]
 
-    # reformatear series de caudal y nivel
+    # reformatear series de caudal
     if indroea is None:
         cols = data.index.unique()
     else:
@@ -53,6 +54,83 @@ def extraer_caudal(file: Path, indroea: Union[str, List[str]] = None, start: Uni
         data_stn = data.loc[stn].set_index('fecha', drop=True)
         caudal[stn] = data_stn.caudal
     
+    # eliminar estaciones sin ningún dato
+    caudal.dropna(axis=1, how='all', inplace=True)
+
+    caudal.index.name = 'date'
+
+    return caudal
+
+
+
+def extraer_caudal_embalses(file: Path, ref_ceh: Union[str, List[str]] = None, start: Union[str, pd.Timestamp] = None, end: Union[str, pd.Timestamp] = None) -> pd.DataFrame:
+    """Calcula las series diarias de caudal de entrada en el embalse a partir de las series de volumen y caudal de salida del archivo 'afliqe.csv' del Anuario de Aforos. La serie se puede recortar al periodo y embalses de interés
+    
+    Parámetros:
+    -----------
+    file:      str. Ruta del archivo original con las series de caudal
+    ref_ceh:   str or list. Listado con el ID de las estaciones ROEA (Red Oficial de Estaciones de Aforo) cuya serie de caudal se quiere extraer
+    start:     str or datetime.date. Fecha de inicio del periodo de estudio
+    end:       str or datetime.date. Fecha final del periodo de estudio
+
+    Salida:
+    -------
+    caudal:    pandas.DataFrame. Tabla con las series de caudal diario
+    """
+    
+    if isinstance(ref_ceh, str):
+        ref_ceh = [ref_ceh]
+    elif isinstance(ref_ceh, list):
+        ref_ceh = [str(x) for x in ref_ceh]
+    elif ref_ceh is not None:
+        print('ERROR. "ref_ceh" ha de ser bien una cadena de texto, una lista o None.')
+        return
+        
+    # cargar series
+    data = pd.read_csv(file, sep=';', index_col='ref_ceh')
+    data.index = data.index.astype(str)
+    data.fecha = pd.to_datetime(data.fecha, dayfirst=True)
+
+    # recortar a la fecha de estudio
+    if start is not None:
+        data = data.loc[data.fecha >= start, :]
+    if end is not None:
+        data = data.loc[data.fecha <= end, :]
+
+    # generar series de caudal de entrada
+    if ref_ceh is None:
+        cols = data.index.unique()
+    else:
+        cols = data.index.unique().intersection(ref_ceh)
+    caudal = pd.DataFrame(index=pd.date_range(data.fecha.min(), data.fecha.max(), freq='1d'), columns=cols, dtype=float) 
+    for stn in caudal.columns:
+        # extraer datos del embalse
+        data_stn = data.loc[stn].copy()
+        data_stn.set_index('fecha', drop=True, inplace=True)
+        # serie de caudal de entrada
+        E = pd.Series()
+        for tipo in data_stn.tipo.unique():
+            data__ = data_stn.loc[data_stn.tipo == tipo].copy()
+            data__.drop('tipo', axis=1, inplace=True)
+            data__ = data__.loc[data__.first_valid_index():data__.last_valid_index()]
+            if tipo == 1:
+                # E2 = R2 - R1 + S2
+                E2 = data__.reserva.diff() / 0.0864 + data__.salida.iloc[1:] # m³/s
+                E = pd.concat((E, E2))
+            elif tipo == 2:
+                # E1 = R2 - R1 + S1
+                E1 = data__.reserva.diff().shift(-1) / 0.0864 + data__.salida # m³/s
+                E = pd.concat((E, E1))
+        # eliminar caudales negativos
+        E[E < 0] = np.nan
+        # ordenar el índice y eliminar duplicidades
+        E.sort_index(axis=0, inplace=True)
+        E = E[~E.index.duplicated(keep='last')]
+        # recortar la serie al periodo con valores
+        E = E[E.first_valid_index():E.last_valid_index()]
+        # guardar serie
+        caudal[stn] = E
+
     # eliminar estaciones sin ningún dato
     caudal.dropna(axis=1, how='all', inplace=True)
 
