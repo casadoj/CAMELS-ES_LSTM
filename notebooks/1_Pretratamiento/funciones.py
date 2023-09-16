@@ -9,6 +9,7 @@ import rioxarray
 from tqdm.notebook import tqdm
 from typing import Union, List, Dict
 from pathlib import Path
+import random
 
 
 def dict2da(dictionary, dim):
@@ -221,3 +222,152 @@ def point_polygon_statistics(puntos: gpd.GeoDataFrame, poligonos: gpd.GeoDataFra
 
 
 
+def dividir_estaciones(ids: List[str], cal: float = .7, val: float = .3, path: Path = None, seed: int = 0) -> Dict:
+    """Dada una lista de estaciones, divide la muestra en dos (tres) submuestras: entrenamiento, validación (test). Las submuestras se pueden guardar como archivos TXT.
+
+    Parámetros:
+    -----------
+    ids: list
+        Listado de estaciones definidas por su código
+    cal: float
+        Proporción de estaciones a incluir en la submuestra de entrenamiento
+    val: float
+        Proporción de estaciones a incluir en la submuestra de validación. Si la suma de 'cal' y 'val' es inferior a 1, las estaciones restantes son la submuestra de test
+    ruta: Path
+        Directorio donde guardar los archivos de texto con las submuestras de estaciones
+    seed: int
+        Semilla utilizada al generar la selección aleatoria de estaciones
+
+    Devuelve:
+    ---------
+    basins: dict
+        Un diccionario con los listados de las submuestras de estaciones
+    """
+
+    n_stns = len(ids)
+    random.seed(seed)
+    
+    assert 0 < cal <= 1, '"cal" debe de ser un valor entre 0 y 1.'
+    assert 0 < val <= 1, '"val" debe de ser un valor entre 0 y 1.'
+
+    # exportar el conjunto completo de estaciones
+    if path is not None:
+        with open(path / 'basins_all.txt', 'w') as file:
+            for id in ids:
+                file.write(id + '\n')
+                
+    if cal + val > 1:
+        val = 1 - cal
+        print(f'"val" fue truncado a {val:0.2f}')
+    # definir las estaciones de evaluación
+    if cal + val < 1.:
+        test = 1 - cal - val
+        n_test = int(n_stns * test)
+        ids_test = random.sample(ids, n_test)
+        ids_test.sort()
+        ids = [id for id in ids if id not in ids_test]
+    else:
+        test = None
+        ids_test = []
+        
+    # estaciones de validación
+    n_val = int(n_stns * val)
+    ids_val = random.sample(ids, n_val)
+    ids_val.sort()
+    
+    # estaciones de entrenamiento
+    ids_cal = [id for id in ids if id not in ids_val]
+    ids_cal.sort()
+    
+    assert (len(ids_cal) + len(ids_val) + len(ids_test)) == n_stns, 'La unión de las estaciones de calibración, validación y test tiene menos estaciones que la lista "ids" original.'
+
+    basins = {'train': ids_cal, 'validation': ids_val}
+    if test is not None:
+        basins.update({'test': ids_test})
+            
+    # exportar los conjuntos de etaciones
+    if path is not None:
+        for key, ls in basins.items():
+            with open(path / f'basins_{key}.txt', 'w') as file:
+                for id in ls:
+                    file.write(id + '\n')
+
+    return basins
+
+
+
+def dividir_periodo_estudio(serie: pd.Series, ini: int = None, fin: int = None, cal: float = .6, val: float = .2) -> xr.DataArray:
+    """Dada una serie temporal, se definen las fechas de inicio y fin de los periodos de calibración ('train'), validación ('validation') y evaluación ('test').
+
+    Parámetros:
+    -----------
+    serie: pd.Series
+        Serie temporal a dividir
+    ini: int
+        Año de inicio del periodo de estudio
+    fin: int
+        Año de fin del periodo de estudio
+    cal: float
+        Proporción de los datos a incluir en el periodo de calibración. Estos datos se tomarán de la parte final de la serie.
+    val: float
+        Proporción de los datos a incluir en el periodo de validación. Estos datos se tomarán de los años inmediatamente anteriores al periodo de calibración. Si la suma de "cal" y "val" es menor a 1, el resto de los datos serán el periodo de evaluación 
+
+    Devuelve:
+    ---------
+    xr.DataArray
+        Contiene para cada periodo (calibración, validación y test) las fechas de inicio y fin.
+    """
+
+    assert 0 <= cal <= 1, '"cal" debe de tener un valor entre 0 y 1'
+    assert 0 <= val <= 1, '"val" debe de tener un valor entre 0 y 1'
+    assert cal + val <= 1, 'La suma de "entrenamiento" y "validación no puede ser mayor de 1."'
+
+    if cal + val < 1:
+        test = 1 - cal - val
+    else:
+        test = 0
+
+    # periodo completo de datos
+    n_años = fin - ini
+    ini = serie[serie.index.year == ini].first_valid_index()
+    fin = serie[serie.index.year == fin].last_valid_index()
+
+    # periodo de test
+    if test > 0:
+        ini_test = ini
+        n_test = round(n_años * test)
+        fin_test = pd.Timestamp(ini_test.year + n_test, 9, 30)
+    else:
+        ini_test, fin_test = np.datetime64('NaT', 'ns'), np.datetime64('NaT', 'ns')
+
+    # periodo de validación
+    if val > 0:
+        if test > 0:
+            ini_val = fin_test + pd.Timedelta(days=1)
+        else:
+            ini_val = ini
+        n_val = round(val * n_años)
+        fin_val = pd.Timestamp(ini_val.year + n_val, 9, 30)
+    else:
+        ini_val, fin_val = np.datetime64('NaT', 'ns'), np.datetime64('NaT', 'ns')
+
+    # periodo de calibración
+    if cal > 0:
+        if val > 0:
+            ini_cal = fin_val + pd.Timedelta(days=1)
+        else:
+            if test > 0:
+                ini_cal = fin_test + pd.Timedelta(days=1)
+            else:
+                ini_cal = ini        
+        fin_cal = fin
+    else:
+        ini_cal, fin_cal = np.datetime64('NaT', 'ns'), np.datetime64('NaT', 'ns')
+
+    # xarray.DataArray con las fechas de inicio y fin de los 3 periodos
+    da = xr.DataArray([[ini_cal, ini_val, ini_test], [fin_cal, fin_val, fin_test]],
+                          coords={'date': ['start', 'end'],
+                                  'period': ['train', 'validation', 'test']},
+                          dims=['date', 'period'])
+        
+    return da

@@ -10,10 +10,11 @@ seleccion:
 rutas:
     anuario_aforos: C:/Datasets/anuario_aforos/
     EFAS: C:/Datasets/EFASv5/iberia/
-    caravan: C:/Datasets/CAMELS-ESP/CAMELS-ESP3/
+    CAMELS: ../../data/CAMELS-ES/
 
 train_size: .6
 val_size: .2
-seed: 123
+seed: 0 #123
+crs: 'epsg:4326'
 
 
