@@ -1,0 +1,72 @@
+attribute_means:
+  CalChanMan1: 1.232223896892524
+  CalChanMan2: 3.389720712337026
+  GwLoss: 0.33636231929930394
+  GwPercValue: 0.5482633354862226
+  LZThreshold: 13.711901609517314
+  LakeMultiplier: 1.2625669701699098
+  LowerZoneTimeConstant: 4345.111305962311
+  PowerPrefFlow: 2.5433396686074192
+  QSplitMult: 6.358888880515391
+  ReservoirRnormqMult: 1.1192452210955826
+  SnowMeltCoef: 4.730006744525184
+  UpperZoneTimeConstant: 12.381526864379461
+  adjust_Normal_Flood: 0.5705344338267128
+  b_Xinanjiang: 1.838232510437492
+attribute_stds:
+  CalChanMan1: 0.41378233172955753
+  CalChanMan2: 1.0547995474234706
+  GwLoss: 0.28562106599910525
+  GwPercValue: 0.5524117930483515
+  LZThreshold: 6.311414799018397
+  LakeMultiplier: 0.3646381148426346
+  LowerZoneTimeConstant: 2561.5042308720845
+  PowerPrefFlow: 1.8073930020710351
+  QSplitMult: 3.95883580472242
+  ReservoirRnormqMult: 0.3998528225123405
+  SnowMeltCoef: 0.9605914333717237
+  UpperZoneTimeConstant: 9.413460389775567
+  adjust_Normal_Flood: 0.24425684382695326
+  b_Xinanjiang: 1.6206877411907992
+xarray_feature_scale:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    dis_efas5:
+      dims: []
+      attrs: {}
+      data: 1.8790825605392456
+    e0_emo1:
+      dims: []
+      attrs: {}
+      data: 2.12280535697937
+    pr_emo1:
+      dims: []
+      attrs: {}
+      data: 5.182871341705322
+    ta_emo1:
+      dims: []
+      attrs: {}
+      data: 6.97121524810791
+xarray_feature_center:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    dis_efas5:
+      dims: []
+      attrs: {}
+      data: 0.8462032079696655
+    e0_emo1:
+      dims: []
+      attrs: {}
+      data: 2.4891140460968018
+    pr_emo1:
+      dims: []
+      attrs: {}
+      data: 2.001115560531616
+    ta_emo1:
+      dims: []
+      attrs: {}
+      data: 11.89150333404541
