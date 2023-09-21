@@ -1,0 +1,114 @@
+attribute_means:
+  aridity: 2.3931547441635717
+  cly_pc_sav: 18.89404141041462
+  crp_pc_sse: 19.81898592692018
+  ele_mt_sav: 950.3524896194965
+  ele_mt_smn: 637.3243642062693
+  ele_mt_smx: 1475.966911371639
+  for_pc_sse: 57.654935061961
+  high_prec_dur: 1.2767463525672484
+  high_prec_freq: 0.04933174896096389
+  ire_pc_sse: 2.4468827156953292
+  kar_pc_sse: 26.605043045177467
+  lka_pc_sse: 1.3753026283611083
+  low_prec_dur: 5.070123785335416
+  low_prec_freq: 0.6439527704268154
+  moisture_index: -0.30207799472661884
+  p_mean: 2.35863313996999
+  pet_mean: 4.953393624460903
+  pst_pc_sse: 17.49432968698195
+  seasonality: 1.282448722975519
+  slp_dg_sav: 96.94746155435581
+  snd_pc_sav: 45.798089327791175
+  snw_pc_syr: 6.818562012460553
+  swc_pc_syr: 65.13223456388094
+attribute_stds:
+  aridity: 1.047688304680889
+  cly_pc_sav: 2.9501224100757724
+  crp_pc_sse: 18.47404263235889
+  ele_mt_sav: 354.4314085391559
+  ele_mt_smn: 311.162910505434
+  ele_mt_smx: 503.9291914176431
+  for_pc_sse: 28.00190788220398
+  high_prec_dur: 0.08975080895584651
+  high_prec_freq: 0.009473645065797169
+  ire_pc_sse: 2.781123409429598
+  kar_pc_sse: 28.026551524365203
+  lka_pc_sse: 3.063405427897416
+  low_prec_dur: 1.3228543915132915
+  low_prec_freq: 0.08336768317410029
+  moisture_index: 0.22037211810058924
+  p_mean: 0.8043575159520862
+  pet_mean: 1.2223901122939307
+  pst_pc_sse: 9.911633121303444
+  seasonality: 0.29696395315996943
+  slp_dg_sav: 54.72143755424959
+  snd_pc_sav: 4.09756395925418
+  snw_pc_syr: 5.927871162802145
+  swc_pc_syr: 17.187032805264934
+xarray_feature_scale:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    potential_evaporation_sum:
+      dims: []
+      attrs: {}
+      data: 3.604156970977783
+    streamflow:
+      dims: []
+      attrs: {}
+      data: 2.545393228530884
+    surface_net_solar_radiation_mean:
+      dims: []
+      attrs: {}
+      data: 79.39720153808594
+    surface_pressure_mean:
+      dims: []
+      attrs: {}
+      data: 3.6730871200561523
+    temperature_2m_max:
+      dims: []
+      attrs: {}
+      data: 8.118951797485352
+    temperature_2m_min:
+      dims: []
+      attrs: {}
+      data: 6.224081993103027
+    total_precipitation_sum:
+      dims: []
+      attrs: {}
+      data: 5.006624698638916
+xarray_feature_center:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    potential_evaporation_sum:
+      dims: []
+      attrs: {}
+      data: 5.073562145233154
+    streamflow:
+      dims: []
+      attrs: {}
+      data: 1.0625109672546387
+    surface_net_solar_radiation_mean:
+      dims: []
+      attrs: {}
+      data: 151.36953735351562
+    surface_pressure_mean:
+      dims: []
+      attrs: {}
+      data: 91.2810287475586
+    temperature_2m_max:
+      dims: []
+      attrs: {}
+      data: 16.405532836914062
+    temperature_2m_min:
+      dims: []
+      attrs: {}
+      data: 6.999654293060303
+    total_precipitation_sum:
+      dims: []
+      attrs: {}
+      data: 2.3803529739379883
