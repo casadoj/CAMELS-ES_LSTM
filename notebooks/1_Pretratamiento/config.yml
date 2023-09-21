@@ -14,7 +14,7 @@ rutas:
 
 train_size: .6
 val_size: .2
-seed: 0 #123
+seed: 123
 crs: 'epsg:4326'
 
 

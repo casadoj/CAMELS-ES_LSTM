@@ -10,6 +10,9 @@ from tqdm.notebook import tqdm
 from typing import Union, List, Dict
 from pathlib import Path
 import random
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cf
 
 
 def dict2da(dictionary, dim):
@@ -371,3 +374,63 @@ def dividir_periodo_estudio(serie: pd.Series, ini: int = None, fin: int = None, 
                           dims=['date', 'period'])
         
     return da
+
+
+
+def plot_atributos(df: pd.DataFrame, x: pd.Series, y: pd.Series, save: Path = None, **kwargs):
+    """Se crea mapas con los valores de los diversos atributos en cada una de las estaciones.
+
+    Parámetros:
+    -----------
+    df: pd.DataFrame (estaciones, atributos)
+        Tabla con el valor de los atributos de la cuenca de cada una de las estaciones
+    x: pd.Series
+        Coordenadas X (o longitud) de las estaciones
+    y: pd.Series
+        Coordenadas Y (o latitud) de las estaciones
+    save: Path
+        Archivo donde guardar el gráfico. Por defecto es None y el gráfico no se guarda
+
+    kwargs:
+    -------
+    figsize: List o Tuple
+    ncols: int
+    cmap: str
+    alpha: float
+    """
+
+    # kwargs
+    figsize = kwargs.get('figsize', (5, 4))
+    ncols_max = kwargs.get('ncols', 3)
+    cmap = kwargs.get('cmap', 'magma')
+    alpha = kwargs.get('alpha', 1)
+   
+    proj = ccrs.PlateCarree()
+    ncols, nrows = df.shape[1], 1
+    if ncols > ncols_max:
+        ncols, nrows = ncols_max, int(np.ceil(ncols / ncols_max))
+
+    fig, axes = plt.subplots(ncols=ncols,
+                             nrows=nrows,
+                             figsize=(figsize[0] * ncols, figsize[1] * nrows),
+                             subplot_kw={'projection': proj})
+    for i, col in enumerate(df.columns):
+        if nrows > 1:
+            f, c = i // ncols, i % ncols
+            ax = axes[f, c]
+        else:
+            c = i
+            ax = axes[c]
+        ax.add_feature(cf.NaturalEarthFeature('physical', 'land', '50m', edgecolor=None, facecolor='lightgray'), zorder=0)
+        ax.set_extent(kwargs.get('extent', [-9.5, 3.5, 36, 44.5]), crs=proj)
+        sc = ax.scatter(x[df.index], y[df.index], cmap=cmap, c=df[col], s=5, alpha=alpha, label=col)
+        cbar = plt.colorbar(sc, ax=ax, orientation='horizontal', shrink=.5)
+        ax.set_title(' '.join(col.split('_')))
+        ax.axis('off');
+    
+    if c < ncols - 1:
+        for c_ in range(c + 1, ncols):
+            axes[f, c_].axis('off')
+
+    if save is not None:
+        plt.savefig(save, dpi=300, bbox_inches='tight')
