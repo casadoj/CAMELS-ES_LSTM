@@ -285,8 +285,8 @@ def periodo_estudio(series: pd.DataFrame, disponibilidad: float = .9, min_años:
     
     # calcular la disponibilidad de datos cada año en cada estación
     series_anual = series.groupby(series.index.year)
-    n_datos = series_anual.count()
-    n_dias = series_anual.size()
+    n_datos = series_anual.count().astype(float)
+    n_dias = series_anual.size().astype(float)
     for año in n_dias.index:
         n_datos.loc[año,:] /= n_dias[año]
     
