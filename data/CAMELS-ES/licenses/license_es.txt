@@ -1,0 +1,27 @@
+ Copyright notice
+------------------
+
+Any copyright and/or sui generis right on the dataset 
+is licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence [1]. 
+Reuse is allowed provided appropriate credit is given and any changes are indicated.
+
+[1] https://creativecommons.org/licenses/by/4.0
+
+References
+----------
+
+The discharge records are taken from the "Anuario de Aforos" (https://ceh.cedex.es/anuarioaforos/default.asp),
+a public repository of hydrological records in Spain curated by CEDEX (Centro de Estudios y Experimentación 
+de Obras Públicas) and supported by the gauging networks of the several water agencies in the country.
+
+The European Flood Awareness System (EFAS) version 5.0 is part of the Copernicus Emergency Management Services (https://emergency.copernicus.eu/)
+ 
+ * EFASv5 simulated discharge is publicly available in the Copernicus Climate Data Store (https://cds.climate.copernicus.eu)
+ * EFAS static maps are publicly available in the Joint Research Centre data catalog (https://data.jrc.ec.europa.eu/dataset/f572c443-7466-4adf-87aa-c0847a169f23)
+ * The EMO1 dataset is publicly available in the Joint Research Centre data catalog (http://data.europa.eu/89h/0bd84be4-cec8-4180-97a6-8b3adaac4d26 )
+ 
+HydroATLAS is licensed under a Creative Commons Attribution (CC-BY) 4.0 International Licence (https://www.hydrosheds.org)
+
+ERA5-Land hourly data is publicly available in the Copernicus Climate Data Store (https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=overview)
+
+The processing of HydroATLAS and ERA5 data was done using the Caravan GitHub repository (https://github.com/kratzert/Caravan).
