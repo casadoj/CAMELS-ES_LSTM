@@ -6,6 +6,9 @@ rutas:
     EFAS: 
         orig: C:/Datasets/EFASv5/iberia
         repo: ../../data/EFAS5
+    EMO:
+        orig: C:/Datasets/EMO1
+        repo: ../../data/EMO1
     CAMELS: 
         orig: C:/Datasets/CAMELS-ES
         repo: ../../data/CAMELS-ES
