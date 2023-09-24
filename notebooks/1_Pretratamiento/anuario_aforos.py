@@ -237,8 +237,21 @@ def plot_caudal(serie: pd.Series, inicios: List[pd.Timestamp] = None, finales: L
 
     Parámetros:
     -----------
-    serie:     pd.Series. Serie de caudal
-    save:      str. Ruta donde guardar el gráfico. Por defecto es None y el gráfico no se guarda
+    serie:     pd.Series
+        Serie de caudal
+    inicios:   List (3,)
+        Lista de fechas de inicio del periodo de entrenamiento, validación y evaluación
+    finales:   List (3,)
+        Lista de fechas de fin del periodo de entrenamiento, validación y evaluación
+    save:      str
+        Ruta donde guardar el gráfico. Por defecto es None y el gráfico no se guarda
+        
+    kwargs:
+    -------
+    figsize:   tuple (2,)
+        Tamaño del gráfico
+    lw:        tuple (2,)
+        Grosor de línea
     """
 
     lw = kwargs.get('lw', .8)
@@ -250,8 +263,10 @@ def plot_caudal(serie: pd.Series, inicios: List[pd.Timestamp] = None, finales: L
     else:
         assert len(inicios) == len(finales), 'La longitud de las listas "inicios" y "finales" ha de ser la misma.'
         for ini, fin in zip(inicios, finales):
+            if np.isnan(ini) or np.isnan(fin):
+                continue
             ax.plot(serie[ini:fin], lw=lw)
-        ax.set_xlim(np.min(inicios), np.max(finales))
+        ax.set_xlim(np.nanmin(inicios), np.nanmax(finales))
         
     ax.set(ylim=(0, None),
            ylabel=kwargs.get('ylabel', 'Q (m3/s)'),
