@@ -80,7 +80,7 @@ learning_rate:
 batch_size: 256
 
 # Number of training epochs
-epochs: 45
+epochs: 50
 
 # If a value, clips the gradients during training to that norm.
 clip_gradient_norm: 0.8
@@ -151,10 +151,10 @@ static_attributes:
     - thetas1
     - thetar1
     # regulation
-    - tstor_sum
-    - tstor_count
-    - area_sum
-    - area_count
+    - reserv_vol
+    - reserv_count
+    - lake_area
+    - lake_count
     # demand
     - dom_yr
     - ene_yr
@@ -176,12 +176,12 @@ static_attributes:
     - SnowMeltCoef
     - UpperZoneTimeConstant
     # hydrology
-    - pr_emo1_year
-    - ta_emo1_year
-    - e0_emo1_year
-    - dis_efas5_yrmean
-    - dis_efas5_yrmax
-    - dis_efas5_yrmin
+    # - pr_emo1_year
+    # - ta_emo1_year
+    # - e0_emo1_year
+    # - dis_efas5_yrmean
+    # - dis_efas5_yrmax
+    # - dis_efas5_yrmin
 
 # which columns to use as target
 target_variables:
