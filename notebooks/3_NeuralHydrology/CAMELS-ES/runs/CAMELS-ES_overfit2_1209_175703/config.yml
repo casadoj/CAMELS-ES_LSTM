@@ -3,7 +3,7 @@ clip_gradient_norm: 0.8
 clip_targets_to_zero:
 - streamflow
 commit_hash:
-data_dir: ../../../data/CAMELS-ESP
+data_dir: ../../../data/CAMELS-ES
 dataset: generic
 device: cuda:0
 dynamic_inputs:
@@ -14,11 +14,11 @@ dynamic_inputs:
 - surface_net_solar_radiation_mean
 - surface_pressure_mean
 epochs: 20
-experiment_name: CAMELS-ESP2_overfit2
+experiment_name: CAMELS-ES_overfit2
 head: regression
 hidden_size: 128
 img_log_dir: 
-  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ESP2_overfit_1209_175703/img_log
+  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ES_overfit_1209_175703/img_log
 initial_forget_bias: 3
 learning_rate:
   0: 0.001
@@ -42,7 +42,7 @@ per_basin_train_periods_file: train_periods2.pkl
 per_basin_validation_periods_file: validation_periods2.pkl
 predict_last_n: 1
 run_dir: 
-  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ESP2_overfit_1209_175703
+  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ES_overfit_1209_175703
 save_validation_results: true
 save_weights_every: 1
 seed: 123
@@ -73,10 +73,10 @@ static_attributes:
 - low_prec_dur
 target_variables:
 - streamflow
-test_basin_file: test_basins.txt
-train_basin_file: train_basins.txt
+test_basin_file: basins_test.txt
+train_basin_file: basins_train.txt
 train_dir: 
-  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ESP2_overfit_1209_175703/train_data
+  /content/drive/MyDrive/TFM/notebook/models/CAMELS-ES/runs/CAMELS-ES_overfit_1209_175703/train_data
 validate_every: 1
 validate_n_random_basins: 100
-validation_basin_file: validation_basins.txt
+validation_basin_file: basins_validation.txt

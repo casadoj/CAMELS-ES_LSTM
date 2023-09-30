@@ -38,7 +38,7 @@ def crear_cmap(cmap: str, bounds: List[float], name: str = '', specify_color: Tu
 
 
 
-def rendimiento_LSTM(cuencas: gpd.GeoDataFrame, ecdf: Dict[str, pd.Series], metrica: str = 'KGE', demarcaciones: gpd.GeoDataFrame = None,
+def rendimiento_LSTM(cuencas: gpd.GeoDataFrame, ecdf: Dict[str, pd.Series], metrica: str = 'KGE', referencia: str = None, demarcaciones: gpd.GeoDataFrame = None,
                      save: Union[str, Path] = None, **kwargs):
     """Crea una figura con el rendimiento del modelo LSTM según cuencas. La figura contiene dos gráficos, uno que muestra la función de distribución empírica de cada una de las muestras (entrenamiento, validación y evaluación), y otro que es un mapa que muestra la distribución geográfica del rendimiento.
 
@@ -50,6 +50,8 @@ def rendimiento_LSTM(cuencas: gpd.GeoDataFrame, ecdf: Dict[str, pd.Series], metr
         Fundión de densidad empírica de las tres muestras (entrenamiento, validación y evaluación). El diccionario ha de tener tres entradas con cada una de las 3 muestras y dentro una serie con la ECDF
     metrica:   str
         Métrica de rendimiento. "cuencas" ha de contener una columna con este nombre
+    referencia: str
+        Clave de "ecdf" a utilizar como referencia
     demarcaciones: gpd.GeoDataFrame
         Opcional. Capa de polígonos con las demarcaciones hidrográficas (cuencas hidrográficas principales)
     save:      Union[str, Path]
@@ -85,8 +87,12 @@ def rendimiento_LSTM(cuencas: gpd.GeoDataFrame, ecdf: Dict[str, pd.Series], metr
     
     # función de densidad empírica
     ax1 = plt.subplot(gs[0])
-    for (period, series), ls in zip(ecdf.items(), ['--', ':', '-']):
-        ax1.plot(series, label=period, lw=1.2, c='steelblue', ls=ls)
+    for (key, series), ls in zip(ecdf.items(), [':', '--', '-'] * 2):
+        c = 'steelblue'
+        if referencia is not None:
+            if key == referencia:
+                c, ls = 'maroon', '-'
+        ax1.plot(series, label=key, lw=1.2, c=c, ls=ls)
     ax1.set(xlim=(-.01, 1.01),
             xlabel='ECDF (-)',
             ylim=(-1.02, 1.02),
