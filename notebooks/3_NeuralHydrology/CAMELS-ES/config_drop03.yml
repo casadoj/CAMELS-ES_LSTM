@@ -1,26 +1,20 @@
 # --- Experiment configurations --------------------------------------------------------------------
 
 # experiment name, used as folder name
-experiment_name: CAMELS-ESP2_drop03
+experiment_name: CAMELS-ES_drop03
 
 # place to store run directory (if empty runs are stored in $cwd$/runs/)
 run_dir:
 
 # files to specify training, validation and test basins (relative to code root or absolute path)
-train_basin_file: train_basins.txt
-validation_basin_file: validation_basins.txt
-test_basin_file: test_basins.txt
+train_basin_file: basins_train.txt
+validation_basin_file: basins_validation.txt
+test_basin_file: basins_test.txt
 
 # training, validation and test time periods (format = 'dd/mm/yyyy')
-#train_start_date: "01/10/2015"
-#train_end_date: "30/09/2020"
-#validation_start_date: "01/10/2013"
-#validation_end_date: "30/09/2015"
-#test_start_date: "01/10/2011"
-#test_end_date: "30/09/2013"
-per_basin_train_periods_file: train_periods2.pkl
-per_basin_validation_periods_file: validation_periods2.pkl
-per_basin_test_periods_file: test_periods2.pkl
+per_basin_train_periods_file: periods_train.pkl
+per_basin_validation_periods_file: periods_validation.pkl
+per_basin_test_periods_file: periods_test.pkl
 
 # fixed seed, leave empty to use a random seed
 seed: 123
@@ -120,7 +114,7 @@ save_validation_results: True
 dataset: generic
 
 # Path to data set root
-data_dir: ../../../data/CAMELS-ESP
+data_dir: ../../../data/CAMELS-ES
 
 dynamic_inputs:
   - total_precipitation_sum
