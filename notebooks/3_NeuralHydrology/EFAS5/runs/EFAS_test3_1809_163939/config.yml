@@ -62,10 +62,10 @@ static_attributes:
 - soildepth1
 - thetas1
 - thetar1
-- tstor_sum
-- tstor_count
-- area_sum
-- area_count
+- reserv_vol
+- reserv_count
+- lake_area
+- lake_count
 - dom_yr
 - ene_yr
 - ind_yr
