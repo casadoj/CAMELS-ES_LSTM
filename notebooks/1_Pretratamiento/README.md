@@ -1,5 +1,4 @@
 # 1 Pretratamiento
-***
 
 En esta carpeta se incluyen los _notebooks_ utilizados en el pretratamiento de datos necesario para generar el conjunto de datos CAMELS-ES.
 
