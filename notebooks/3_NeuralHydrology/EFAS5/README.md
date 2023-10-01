@@ -11,6 +11,8 @@ Los resultados más convincentes de las primeras pruebas fueron los obtenidos pa
 | Modelo  | `batch_size` | `hidden_size` | `dropout` | `clip_gradient_norm` |
 | ------- | ------------ | ------------- | --------- | -------------------- |
 | test3.3 |  256         | 128           | 0.5       | 0.8                  |
-| **test3.4** |  512         | 128           | 0.5       | 0.8                  |
+| **test3.4** |  **512** | **128**       | **0.5**   | **0.8**              |
 | test3.5 |  512         | 64            | 0.5       | 0.8                  |
 | test3.6 |  512         | 128           | 0.4       | 1.0                  |
+
+De estos modelos el mejor rendimiento se obtuvo para el llamado **test3.4**.
