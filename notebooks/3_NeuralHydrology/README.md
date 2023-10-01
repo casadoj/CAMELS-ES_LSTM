@@ -15,7 +15,7 @@ Modelo LSTM entrenado para emular el modelo hidrológico LISFLOOD-OS en su imple
 Cada uno de los dos modelos se encuentran en su directorio correspondiente. En ambos casos, el directorio contiene lo siguiente:
 
 * _Notebooks_ para el entrenamiento, comparación de modelos y análisis de resultados. El notebook *1_train_test.ipynb* está preparado para ser ejecutado en Google Colab, puesto que es necesario disponer de una GPU para acelerar el entrenamiento y simulación.
-* Archivos *basins_?.txt* con las cuencas en las muestra de entrenamiento, validación y test.
+* Archivos *basins_?.txt* que definen las cuencas que conforman las muestras de entrenamiento, validación y test.
 * Archivos *config_?.yml* con la configuración del LSTM para cada uno de los modelos entrenados. Los modelos entrenados se guardan dentro del subdirectorio `runs` con el nombre del modelo definido en el archivo de configuración y la fecha y hora cuando fueron entrenados.
 * Archivos *periods_?.pkl* con los periodos de entrenamiento, validación y test para cada cuenca.
 
