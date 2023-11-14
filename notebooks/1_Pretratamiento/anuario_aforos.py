@@ -63,6 +63,60 @@ def extraer_caudal_estaciones(file: Path, indroea: Union[str, List[str]] = None,
 
 
 
+def extraer_series_embalses(file: Path, ref_ceh: Union[str, List[str]] = None, start: Union[str, pd.Timestamp] = None, end: Union[str, pd.Timestamp] = None) -> Dict[str, pd.DataFrame]:
+    """Extrae las series diarias de caudal del archivo 'afliq.csv' del Anuario de Aforos. La serie se puede recortar al periodo y estaciones de interés
+    
+    Parámetros:
+    -----------
+    file:      str. Ruta del archivo original con las series de caudal
+    ref_ceh:   str or list. Listado con el ID de los embalses ROEA (Red Oficial de Estaciones de Aforo) cuyas series  se quieren extraer
+    start:     str or datetime.date. Fecha de inicio del periodo de estudio
+    end:       str or datetime.date. Fecha final del periodo de estudio
+
+    Salida:
+    -------
+    dct:    Dct[str: pandas.DataFrame]. Tabla con las series de cada embalse
+    """
+
+    if isinstance(ref_ceh, str):
+        ref_ceh = [ref_ceh]
+    elif isinstance(ref_ceh, list):
+        ref_ceh = [str(x) for x in ref_ceh]
+    elif ref_ceh is not None:
+        print('ERROR. "ref_ceh" ha de ser bien una cadena de texto, una lista o None.')
+        #return
+
+    # cargar series
+    data = pd.read_csv(file, sep=';', index_col='ref_ceh')
+    data.index = data.index.astype(str)
+    data.fecha = pd.to_datetime(data.fecha, dayfirst=True)
+
+    # recortar a la fecha de estudio
+    if start is not None:
+        data = data.loc[data.fecha >= start, :]
+    if end is not None:
+        data = data.loc[data.fecha <= end, :]
+
+    # reformatear series de caudal
+    if ref_ceh is None:
+        cols = data.index.unique()
+    else:
+        cols = data.index.unique().intersection(ref_ceh)
+
+    dct = {}
+    for id in cols:
+        df = data.loc[id, :]
+        df.columns = ['date', 'storage', 'outflow', 'type']
+        df.set_index('date', drop=True, inplace=True)
+        df.dropna(axis=1, how='all', inplace=True)
+        st = min([df[col].first_valid_index() for col in df.columns if (df[col].first_valid_index() is not None) and (col != 'type')])
+        en = max([df[col].last_valid_index() for col in df.columns if (df[col].last_valid_index() is not None) and (col != 'type')])
+        dct[id] = df.loc[st:en]
+
+    return dct
+
+
+
 def extraer_caudal_embalses(file: Path, ref_ceh: Union[str, List[str]] = None, start: Union[str, pd.Timestamp] = None, end: Union[str, pd.Timestamp] = None) -> pd.DataFrame:
     """Calcula las series diarias de caudal de entrada en el embalse a partir de las series de volumen y caudal de salida del archivo 'afliqe.csv' del Anuario de Aforos. La serie se puede recortar al periodo y embalses de interés
     
