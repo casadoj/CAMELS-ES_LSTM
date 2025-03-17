@@ -23,8 +23,12 @@ _CARAVAN_START_DATE = pd.to_datetime('1981-01-01', format="%Y-%m-%d")
 _CARAVAN_END_DATE = pd.to_datetime('2020-12-31', format="%Y-%m-%d")
 
 
-def process_earth_engine_outputs(csv_files: List[Path], basin_id_field: str, era5l_bands: List[str], output_dir: Path,
-                                 num_workers: int) -> List[pd.DataFrame]:
+def process_earth_engine_outputs(csv_files: List[Path],
+                                 basin_id_field: str,
+                                 era5l_bands: List[str],
+                                 output_dir: Path,
+                                 num_workers: int,
+                                 basin_prefix: str | None = None) -> List[pd.DataFrame]:
     """Processes Earth Engine output files in parallel into per-basin netCDF files.
     
     Parameters
@@ -42,6 +46,8 @@ def process_earth_engine_outputs(csv_files: List[Path], basin_id_field: str, era
     num_workers : int
         Number of parallel workers. Usually this should be a value lower than the maximum number of cores available on 
         your system.
+    basin_prefix : str | None
+        String prefix that is prepended to the gauge ids in the basin_id_field in the following format {prefix}_{id}.
     """
 
     # Split Earth Engine outputs into per-basin netCDF files.
@@ -51,7 +57,8 @@ def process_earth_engine_outputs(csv_files: List[Path], basin_id_field: str, era
                 partial(_process_single_file,
                         basin_id_field=basin_id_field,
                         era5l_bands=era5l_bands,
-                        output_dir=output_dir), csv_files),
+                        output_dir=output_dir,
+                        basin_prefix=basin_prefix), csv_files),
                  total=len(csv_files),
                  desc="Splitting Earth Engine output into per-basin files."))
 
@@ -66,9 +73,13 @@ def process_earth_engine_outputs(csv_files: List[Path], basin_id_field: str, era
                  desc="Combining files per-basin into one file."))
 
 
-def _process_single_file(csv_file: Path, basin_id_field: str, era5l_bands: List[str], output_dir: Path):
+def _process_single_file(csv_file: Path, basin_id_field: str, era5l_bands: List[str], output_dir: Path,
+                         basin_prefix: str | None):
     # Load all data of one csv file into memory.
-    df = load_and_clean_csv_file(csv_file=csv_file, basin_id_field=basin_id_field, era5l_bands=era5l_bands)
+    df = load_and_clean_csv_file(csv_file=csv_file,
+                                 basin_id_field=basin_id_field,
+                                 era5l_bands=era5l_bands,
+                                 basin_prefix=basin_prefix)
 
     # Get unique list of basin ids. The field is renamed in the function above to gauge_id.
     basins = list(set(df["gauge_id"].to_list()))
@@ -81,7 +92,8 @@ def _process_single_file(csv_file: Path, basin_id_field: str, era5l_bands: List[
             print(csv_file, basin)
 
 
-def load_and_clean_csv_file(csv_file: Path, basin_id_field: str, era5l_bands: List[str]) -> pd.DataFrame:
+def load_and_clean_csv_file(csv_file: Path, basin_id_field: str, era5l_bands: List[str],
+                            basin_prefix: str | None) -> pd.DataFrame:
     """Load raw Earth Engine outputs and convert into time indexed DataFrame.
     
     Parameters
@@ -93,6 +105,8 @@ def load_and_clean_csv_file(csv_file: Path, basin_id_field: str, era5l_bands: Li
         used to derive the spatially averaged forcing data.
     era5l_bands : List[str]
         Name of ERA5-Land bands that should be processed.
+    basin_prefix : str
+        String prefix that is prepended to the gauge ids in the basin_id_field in the following format {prefix}_{id}.
 
     Returns
     -------
@@ -103,6 +117,9 @@ def load_and_clean_csv_file(csv_file: Path, basin_id_field: str, era5l_bands: Li
     df = pd.read_csv(csv_file, dtype={basin_id_field: str})
     # Unify the naming of the basin id column
     df = df.rename(columns={basin_id_field: "gauge_id"})
+
+    if basin_prefix is not None and basin_prefix:
+        df["gauge_id"] = df["gauge_id"].map(lambda x: f"{basin_prefix}_{x}")
 
     # Create datetime column
     df["date_str"] = df["system:index"].map(lambda x: x[:11].replace('T', '_'))
@@ -255,7 +272,12 @@ def calculate_climate_indices(df: pd.DataFrame) -> Dict[str, float]:
     Dict[str, float]
         Dictionary, where each key-value-pair is the name of one climate index and the corresponding value.
     """
-    required_columns = ['total_precipitation_sum', 'potential_evaporation_sum', 'temperature_2m_mean']
+    required_columns = [
+        'total_precipitation_sum',
+        'potential_evaporation_sum_ERA5_LAND',
+        'potential_evaporation_sum_FAO_PENMAN_MONTEITH',
+        'temperature_2m_mean',
+    ]
     if any([x not in df.columns for x in required_columns]):
         raise RuntimeError(f"DataFrame is missing one of {required_columns} as column")
 
@@ -265,18 +287,66 @@ def calculate_climate_indices(df: pd.DataFrame) -> Dict[str, float]:
     # Mean daily precip
     p_mean = df["total_precipitation_sum"].mean()
     # Mean daily PET
-    pet_mean = df["potential_evaporation_sum"].mean()
+    pet_mean_era5 = df["potential_evaporation_sum_ERA5_LAND"].mean()
+    pet_mean_fao = df["potential_evaporation_sum_FAO_PENMAN_MONTEITH"].mean()
 
     # Aridity index
-    aridity = pet_mean / p_mean
+    aridity_era5 = pet_mean_era5 / p_mean
+    aridity_fao = pet_mean_fao / p_mean
 
-    # Monthly means required for seasonality and fraction of snow
-    mean_monthly_temp = df["temperature_2m_mean"].groupby(df.index.month).mean()
-    mean_monthly_precip = df["total_precipitation_sum"].groupby(df.index.month).mean()
-    mean_monthly_pet = df["potential_evaporation_sum"].groupby(df.index.month).mean()
+    # Compute moistuer and seasonality index once with ERA5 PET and once with FAO PM PET
+    annual_moisture_index_era5, seasonality_era5 = _get_moisture_and_seasonality_index(
+        precipitation=df["total_precipitation_sum"], pet=df["potential_evaporation_sum_ERA5_LAND"])
+    annual_moisture_index_fao, seasonality_fao = _get_moisture_and_seasonality_index(
+        precipitation=df["total_precipitation_sum"], pet=df["potential_evaporation_sum_FAO_PENMAN_MONTEITH"])
 
     # Fraction of mean monthly precipipitation falling as snow (see Knoben)
+    mean_monthly_precip = df["total_precipitation_sum"].groupby(df.index.month).mean()
+    mean_monthly_temp = df["temperature_2m_mean"].groupby(df.index.month).mean()
     frac_snow = mean_monthly_precip.loc[mean_monthly_temp < 0].sum() / mean_monthly_precip.sum()
+
+    high_prec_freq = len(df.loc[df["total_precipitation_sum"] >= 5 * p_mean]) / len(df)
+    low_prec_freq = len(df.loc[df["total_precipitation_sum"] < 1]) / len(df)
+
+    precip = df["total_precipitation_sum"].values
+    idx = np.where(precip < 1)[0]
+    groups = _split_list(idx)
+    if groups:
+        low_precip_dur = np.mean(np.array([len(p) for p in groups]))
+    else:
+        low_precip_dur = 0.0
+
+    idx = np.where(precip >= 5 * p_mean)[0]
+    groups = _split_list(idx)
+    if groups:
+        high_prec_dur = np.mean(np.array([len(p) for p in groups]))
+    else:
+        high_prec_dur = 0.0
+
+    climate_indices = {
+        'p_mean': p_mean,
+        'pet_mean_ERA5_LAND': pet_mean_era5,
+        'pet_mean_FAO_PM': pet_mean_fao,
+        'aridity_ERA5_LAND': aridity_era5,
+        'aridity_FAO_PM': aridity_fao,
+        'frac_snow': frac_snow,
+        'moisture_index_ERA5_LAND': annual_moisture_index_era5,
+        'seasonality_ERA5_LAND': seasonality_era5,
+        'moisture_index_FAO_PM': annual_moisture_index_fao,
+        'seasonality_FAO_PM': seasonality_fao,
+        'high_prec_freq': high_prec_freq,
+        'high_prec_dur': high_prec_dur,
+        'low_prec_freq': low_prec_freq,
+        'low_prec_dur': low_precip_dur
+    }
+
+    return climate_indices
+
+
+def _get_moisture_and_seasonality_index(precipitation, pet) -> tuple[float, float]:
+
+    mean_monthly_precip = precipitation.groupby(precipitation.index.month).mean()
+    mean_monthly_pet = pet.groupby(pet.index.month).mean()
 
     # Average annual moisture index (see Knoben)
     p_gt_et = 1 - mean_monthly_pet.loc[mean_monthly_precip > mean_monthly_pet] / mean_monthly_precip.loc[
@@ -292,32 +362,7 @@ def calculate_climate_indices(df: pd.DataFrame) -> Dict[str, float]:
     # Seasonality (see Knoben)
     seasonality = monthly_moisture_index.max() - monthly_moisture_index.min()
 
-    high_prec_freq = len(df.loc[df["total_precipitation_sum"] >= 5 * p_mean]) / len(df)
-    low_prec_freq = len(df.loc[df["total_precipitation_sum"] < 1]) / len(df)
-
-    precip = df["total_precipitation_sum"].values
-    idx = np.where(precip < 1)[0]
-    groups = _split_list(idx)
-    low_precip_dur = np.mean(np.array([len(p) for p in groups]))
-
-    idx = np.where(precip >= 5 * p_mean)[0]
-    groups = _split_list(idx)
-    high_prec_dur = np.mean(np.array([len(p) for p in groups]))
-
-    climate_indices = {
-        'p_mean': p_mean,
-        'pet_mean': pet_mean,
-        'aridity': aridity,
-        'frac_snow': frac_snow,
-        'moisture_index': annual_moisture_index,
-        'seasonality': seasonality,
-        'high_prec_freq': high_prec_freq,
-        'high_prec_dur': high_prec_dur,
-        'low_prec_freq': low_prec_freq,
-        'low_prec_dur': low_precip_dur
-    }
-
-    return climate_indices
+    return annual_moisture_index, seasonality
 
 
 def disaggregate_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -435,9 +480,6 @@ def get_metadata_info(xr: xarray.Dataset) -> Dict[str, str]:
         if feature.startswith("temperature_2m"):
             metadata["temperature_2m"] = "2m air temperature [°C]"
 
-        elif feature.startswith("potential_evaporation"):
-            metadata["potential_evaporation"] = "ERA5-Land Potential Evapotranspiration [mm]"
-
         elif feature.startswith("snow_depth_water_equivalent"):
             metadata["snow_depth_water_equivalent"] = "ERA5-Land Snow-Water-Equivalent [mm]"
 
@@ -453,8 +495,13 @@ def get_metadata_info(xr: xarray.Dataset) -> Dict[str, str]:
         elif feature.startswith("total_precipitation"):
             metadata["total_precipitation"] = "Total precipitation [mm]"
 
-        elif feature.startswith("potential_evaporation"):
-            metadata["potential_evaporation"] = "Potential evaporation [mm]"
+        elif feature.startswith("potential_evaporation_sum_ERA5"):
+            metadata[
+                "potential_evaporation_sum_ERA5_LAND"] = "Potential Evaporation [mm] (original potential_evaporation from ERA5-Land)"
+
+        elif feature.startswith("potential_evaporation_sum_FAO"):
+            metadata[
+                "potential_evaporation_sum_FAO_PENMAN_MONTEITH"] = "Potential Evaporation [mm] (FAO Penman-Monteith computed from ERA5-Land inputs)"
 
         elif feature.startswith("u_component_of_wind_10m"):
             metadata["u_component_of_wind_10m"] = "U-component of wind at 10m [m/s]"
@@ -515,5 +562,5 @@ def _utc_to_local_standard_time(df: pd.DataFrame, lat, lon) -> pd.DataFrame:
     tz_name = tf.timezone_at(lat=lat, lng=lon)
     offset = _get_offset(tz_name, lat)
 
-    df.index = df.index + pd.to_timedelta(offset, unit='H')
+    df.index = df.index + pd.to_timedelta(offset, unit='h')
     return df
